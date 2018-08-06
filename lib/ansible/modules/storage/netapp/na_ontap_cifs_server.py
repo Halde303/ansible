@@ -200,7 +200,7 @@ class NetAppOntapcifsServer(object):
         if self.admin_password is not None:
             options['admin-password'] = self.admin_password
         if self.ou is not None:
-            options['oganizational-unit'] = self.ou
+            options['organizational-unit'] = self.ou
         if self.force is not None:
             options['force-account-overwrite'] = str(self.force).lower()
 
