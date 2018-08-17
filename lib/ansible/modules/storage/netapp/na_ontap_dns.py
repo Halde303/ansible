@@ -182,7 +182,7 @@ class NetAppOntapDns(object):
 
     def apply(self):
         # asup logging
-        netapp_utils.ems_log_event("na_ontap_dns", self.vserver)
+        netapp_utils.ems_log_event("na_ontap_dns", self.server)
 
         dns_attrs = self.get_dns()
         changed = False
