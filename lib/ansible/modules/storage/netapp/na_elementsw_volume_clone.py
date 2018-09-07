@@ -19,7 +19,7 @@ DOCUMENTATION = '''
 
 module: na_elementsw_volume_clone
 
-short_description: Create Element OS Software volume clone
+short_description: NetApp Element Software Create Volume Clone
 extends_documentation_fragment:
     - netapp.solidfire
 version_added: '2.7'
@@ -71,17 +71,6 @@ options:
         - locked - No reads or writes are allowed.
         - replicationTarget - Identify a volume as the target volume for a paired set of volumes. If the volume is not paired, the access status is locked.
 
-    password:
-        description:
-        - Element OS Software access account password
-        aliases:
-        - pass
-
-    username:
-        description:
-        - Element OS Software access account user-name
-        aliases:
-        - user
 '''
 
 EXAMPLES = """

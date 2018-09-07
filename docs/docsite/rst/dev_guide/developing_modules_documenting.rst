@@ -239,9 +239,7 @@ The following fields can be used and are all required unless specified otherwise
   :choices:
     List of option values. Should be absent if empty.
   :type:
-
-    * Specifies the data type that option accepts, must match the ``argspec``.
-    * If an argument is ``type='bool'``, this field should be set to ``type: bool`` and no ``choices`` should be specified.
+    If an argument is ``type='bool'``, this field should be set to ``type: bool`` and no ``choices`` should be specified.
   :aliases:
     List of option name aliases; generally not needed.
   :version_added:
@@ -395,14 +393,7 @@ Starting with Ansible version 2.2, all new modules are required to use imports i
 Formatting functions
 --------------------
 
-The formatting functions are:
-
-* ``L()`` for Links with a heading
-* ``U()`` for URLs
-* ``I()`` for option names
-* ``C()`` for files and option values
-* ``M()`` for module names.
-
+These formatting functions are ``U()`` for URLs, ``I()`` for option names, ``C()`` for files and option values and ``M()`` for module names.
 Module names should be specified as ``M(module)`` to create a link to the online documentation for that module.
 
 
@@ -416,7 +407,6 @@ Example usage::
     ...
     See also M(win_copy) or M(win_template).
     ...
-    Time zone names are from the L(tz database,https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
     See U(https://www.ansible.com/tower) for an overview.
     ...
     See L(IOS Platform Options guide, ../network/user_guide/platform_ios.html)

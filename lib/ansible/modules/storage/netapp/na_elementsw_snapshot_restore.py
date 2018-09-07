@@ -21,7 +21,7 @@ DOCUMENTATION = '''
 
 module: na_elementsw_snapshot_restore
 
-short_description:  Element OS Software restore snapshot to active volume.
+short_description:  NetApp Element Software Restore Snapshot
 extends_documentation_fragment:
     - netapp.solidfire
 version_added: '2.7'
@@ -50,18 +50,6 @@ options:
         description:
         - Account ID or Name of Parent/Source Volume.
         required: true
-
-    password:
-        description:
-        - Element OS access account password
-        aliases:
-        - pass
-
-    username:
-        description:
-        - Element OS access account user-name
-        aliases:
-        - user
 
 '''
 

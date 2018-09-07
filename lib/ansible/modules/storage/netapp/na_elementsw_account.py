@@ -20,7 +20,7 @@ DOCUMENTATION = '''
 
 module: na_elementsw_account
 
-short_description: Manage Element SW accounts
+short_description: NetApp Element Software Manage Accounts
 extends_documentation_fragment:
     - netapp.solidfire
 version_added: '2.7'
@@ -196,7 +196,7 @@ class ElementSWAccount(object):
                                  target_secret=self.target_secret,
                                  attributes=self.attributes)
         except Exception as e:
-            self.module.fail_json(msg='Error creating account %s: %s)' % (self.element_username, to_native(e)),
+            self.module.fail_json(msg='Error creating account %s: %s' % (self.element_username, to_native(e)),
                                   exception=traceback.format_exc())
 
     def delete_account(self):

@@ -52,7 +52,7 @@ options:
     description:
      - Destination password.
      - Optional if this is same as source password.
-short_description: "Manage NetApp Cluster peering"
+short_description: "NetApp ONTAP Manage Cluster peering"
 version_added: "2.7"
 '''
 
@@ -67,7 +67,7 @@ EXAMPLES = """
         hostname: "{{ netapp_hostname }}"
         username: "{{ netapp_username }}"
         password: "{{ netapp_password }}"
-        dest_hostname: "{{ netapp_hostname }}"
+        dest_hostname: "{{ dest_netapp_hostname }}"
 
     - name: Delete cluster peer
       na_ontap_cluster_peer:
@@ -77,7 +77,7 @@ EXAMPLES = """
         hostname: "{{ netapp_hostname }}"
         username: "{{ netapp_username }}"
         password: "{{ netapp_password }}"
-        dest_hostname: "{{ netapp_hostname }}"
+        dest_hostname: "{{ dest_netapp_hostname }}"
 """
 
 RETURN = """
@@ -104,10 +104,10 @@ class NetAppONTAPClusterPeer(object):
             state=dict(required=False, type='str', choices=['present', 'absent'], default='present'),
             source_intercluster_lif=dict(required=False, type='str'),
             dest_intercluster_lif=dict(required=False, type='str'),
-            passphrase=dict(required=False, type='str'),
+            passphrase=dict(required=False, type='str', no_log=True),
             dest_hostname=dict(required=True, type='str'),
             dest_username=dict(required=False, type='str'),
-            dest_password=dict(required=False, type='str'),
+            dest_password=dict(required=False, type='str', no_log=True),
             source_cluster_name=dict(required=False, type='str'),
             dest_cluster_name=dict(required=False, type='str')
         ))

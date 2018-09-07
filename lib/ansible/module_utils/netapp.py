@@ -35,6 +35,10 @@ except ImportError:
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.urls import open_url
 from ansible.module_utils.api import basic_auth_argument_spec
+try:
+    from ansible.module_utils.ansible_release import __version__ as ansible_version
+except ImportError:
+    ansible_version = 'unknown'
 
 import os
 import ssl
@@ -199,7 +203,12 @@ def request(url, data=None, headers=None, method='GET', use_proxy=True,
         headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
+
         }
+    headers.update({"netapp-client-type": "Ansible-%s" % ansible_version})
+
+    if not http_agent:
+        http_agent = "Ansible / %s" % (ansible_version)
 
     try:
         r = open_url(url=url, data=data, headers=headers, method=method, use_proxy=use_proxy,
@@ -229,7 +238,7 @@ def request(url, data=None, headers=None, method='GET', use_proxy=True,
         return resp_code, data
 
 
-def ems_log_event(source, server, name="Ansible", id="12345", version="2.7",
+def ems_log_event(source, server, name="Ansible", id="12345", version=ansible_version,
                   category="Information", event="setup", autosupport="false"):
     ems_log = zapi.NaElement('ems-autosupport-log')
     # Host name invoking the API.

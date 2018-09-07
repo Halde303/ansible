@@ -51,11 +51,12 @@ options:
       - Enable and disable https
       type: bool
       default: false
-  no_cert_verify:
+  validate_certs:
       description:
-      - Enable and disable https/ssl certification verification
+      - If set to C(False), the SSL certificates will not be validated.
+      - This should only set to C(False) used on personally controlled sites using self-signed certificates.
+      default: true
       type: bool
-      default: false
   http_port:
       description:
       - Override the default port (80 or 443) with this port
@@ -111,7 +112,8 @@ options:
   username:
       required: true
       description:
-      - Please ensure that the user has the adequate permissions. For more information, please read the official documentation U(https://mysupport.netapp.com/documentation/docweb/index.html?productID=62636&language=en-US).
+      - Please ensure that the user has the adequate permissions. For more information, please read the official documentation
+        U(https://mysupport.netapp.com/documentation/docweb/index.html?productID=62636&language=en-US).
       aliases: ['user']
   password:
       required: true
@@ -121,7 +123,6 @@ options:
 
 requirements:
   - The modules were developed with SolidFire 10.1
-  - Ansible 2.7
   - solidfire-sdk-python (1.1.0.92) or greater. Install using 'pip install solidfire-sdk-python'
 
 notes:
@@ -135,24 +136,31 @@ options:
   api_username:
     required: true
     description:
-    - The username to authenticate with the SANtricity WebServices Proxy or embedded REST API.
+    - The username to authenticate with the SANtricity Web Services Proxy or Embedded Web Services API.
   api_password:
     required: true
     description:
-    - The password to authenticate with the SANtricity WebServices Proxy or embedded REST API.
+    - The password to authenticate with the SANtricity Web Services Proxy or Embedded Web Services API.
   api_url:
     required: true
     description:
-    - The url to the SANtricity WebServices Proxy or embedded REST API.
+    - The url to the SANtricity Web Services Proxy or Embedded Web Services API.
     example:
     - https://prod-1.wahoo.acme.com/devmgr/v2
   validate_certs:
     required: false
     default: true
     description:
-    - Should https certificates be validated?
+        - Should https certificates be validated?
+    type: bool
   ssid:
     required: true
     description:
     - The ID of the array to manage. This value must be unique for each array.
+
+notes:
+  - The E-Series Ansible modules require either an instance of the Web Services Proxy (WSP), to be available to manage
+    the storage-system, or an E-Series storage-system that supports the Embedded Web Services API.
+  - Embedded Web Services is currently available on the E2800, E5700, EF570, and newer hardware models.
+  - M(netapp_e_storage_system) may be utilized for configuring the systems managed by a WSP instance.
     """

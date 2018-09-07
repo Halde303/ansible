@@ -51,6 +51,7 @@ options:
             - Premium_LRS
             - Standard_GRS
             - Standard_LRS
+            - StandardSSD_LRS
             - Standard_RAGRS
             - Standard_ZRS
         aliases:
@@ -67,6 +68,7 @@ options:
         default: 'Storage'
         choices:
             - Storage
+            - StorageV2
             - BlobStorage
         version_added: "2.2"
     access_tier:
@@ -104,8 +106,8 @@ EXAMPLES = '''
         name: clh0002
         type: Standard_RAGRS
         tags:
-          - testing: testing
-          - delete: on-exit
+          testing: testing
+          delete: on-exit
 '''
 
 
@@ -157,7 +159,8 @@ class AzureRMStorageAccount(AzureRMModuleBase):
     def __init__(self):
 
         self.module_arg_spec = dict(
-            account_type=dict(type='str', choices=[], aliases=['type']),
+            account_type=dict(type='str', choices=['Premium_LRS', 'Standard_GRS', 'Standard_LRS', 'StandardSSD_LRS', 'Standard_RAGRS', 'Standard_ZRS'],
+                              aliases=['type']),
             custom_domain=dict(type='dict'),
             location=dict(type='str'),
             name=dict(type='str', required=True),
@@ -165,7 +168,7 @@ class AzureRMStorageAccount(AzureRMModuleBase):
             state=dict(default='present', choices=['present', 'absent']),
             force=dict(type='bool', default=False),
             tags=dict(type='dict'),
-            kind=dict(type='str', default='Storage', choices=['Storage', 'BlobStorage']),
+            kind=dict(type='str', default='Storage', choices=['Storage', 'StorageV2', 'BlobStorage']),
             access_tier=dict(type='str', choices=['Hot', 'Cool'])
         )
 
@@ -450,6 +453,7 @@ class AzureRMStorageAccount(AzureRMModuleBase):
 
 def main():
     AzureRMStorageAccount()
+
 
 if __name__ == '__main__':
     main()

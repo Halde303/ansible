@@ -45,6 +45,9 @@ class ActionBase(with_metaclass(ABCMeta, object)):
     action in use.
     '''
 
+    # A set of valid arguments
+    _VALID_ARGS = frozenset([])
+
     def __init__(self, task, connection, play_context, loader, templar, shared_loader_obj):
         self._task = task
         self._connection = connection
@@ -59,6 +62,8 @@ class ActionBase(with_metaclass(ABCMeta, object)):
 
         # Backwards compat: self._display isn't really needed, just import the global display and use that.
         self._display = display
+
+        self._used_interpreter = None
 
     @abstractmethod
     def run(self, tmp=None, task_vars=None):
@@ -92,6 +97,13 @@ class ActionBase(with_metaclass(ABCMeta, object)):
             raise AnsibleActionSkip('check mode is not supported for this task.')
         elif self._task.async_val and self._play_context.check_mode:
             raise AnsibleActionFail('check mode and async cannot be used on same task.')
+
+        # Error if invalid argument is passed
+        if self._VALID_ARGS:
+            task_opts = frozenset(self._task.args.keys())
+            bad_opts = task_opts.difference(self._VALID_ARGS)
+            if bad_opts:
+                raise AnsibleActionFail('Invalid options for %s: %s' % (self._task.action, ','.join(list(bad_opts))))
 
         if self._connection._shell.tmpdir is None and self._early_needs_tmp_path():
             self._make_tmp_path()
@@ -321,8 +333,6 @@ class ActionBase(with_metaclass(ABCMeta, object)):
 
         self._connection._shell.tmpdir = rc
 
-        if not become_unprivileged:
-            self._connection._shell.env.update({'ANSIBLE_REMOTE_TMP': self._connection._shell.tmpdir})
         return rc
 
     def _should_remove_tmp_path(self, tmp_path):
@@ -341,8 +351,7 @@ class ActionBase(with_metaclass(ABCMeta, object)):
             # If ssh breaks we could leave tmp directories out on the remote system.
             tmp_rm_res = self._low_level_execute_command(cmd, sudoable=False)
 
-            tmp_rm_data = self._parse_returned_data(tmp_rm_res)
-            if tmp_rm_data.get('rc', 0) != 0:
+            if tmp_rm_res.get('rc', 0) != 0:
                 display.warning('Error deleting remote temporary files (rc: %s, stderr: %s})'
                                 % (tmp_rm_res.get('rc'), tmp_rm_res.get('stderr', 'No error string available.')))
             else:
@@ -377,30 +386,6 @@ class ActionBase(with_metaclass(ABCMeta, object)):
             os.unlink(afile)
 
         return remote_path
-
-    def _fixup_perms(self, remote_path, remote_user=None, execute=True, recursive=True):
-        """
-        We need the files we upload to be readable (and sometimes executable)
-        by the user being sudo'd to but we want to limit other people's access
-        (because the files could contain passwords or other private
-        information.
-
-        Deprecated in favor of _fixup_perms2. Ansible code has been updated to
-        use _fixup_perms2. This code is maintained to provide partial support
-        for custom actions (non-recursive mode only).
-
-        """
-        if remote_user is None:
-            remote_user = self._play_context.remote_user
-
-        display.deprecated('_fixup_perms is deprecated. Use _fixup_perms2 instead.', version='2.4', removed=False)
-
-        if recursive:
-            raise AnsibleError('_fixup_perms with recursive=True (the default) is no longer supported. ' +
-                               'Use _fixup_perms2 if support for previous releases is not required. '
-                               'Otherwise use fixup_perms with recursive=False.')
-
-        return self._fixup_perms2([remote_path], remote_user, execute)
 
     def _fixup_perms2(self, remote_paths, remote_user=None, execute=True):
         """
@@ -575,8 +560,8 @@ class ActionBase(with_metaclass(ABCMeta, object)):
                 x = "2"  # cannot read file
             elif errormsg.endswith(u'MODULE FAILURE'):
                 x = "4"  # python not found or module uncaught exception
-            elif 'json' in errormsg or 'simplejson' in errormsg:
-                x = "5"  # json or simplejson modules needed
+            elif 'json' in errormsg:
+                x = "5"  # json module needed
         finally:
             return x  # pylint: disable=lost-exception
 
@@ -755,6 +740,7 @@ class ActionBase(with_metaclass(ABCMeta, object)):
         if not shebang and module_style != 'binary':
             raise AnsibleError("module (%s) is missing interpreter line" % module_name)
 
+        self._used_interpreter = shebang
         remote_module_path = None
 
         if not self._is_pipelining_enabled(module_style, wrap_async):
@@ -764,7 +750,7 @@ class ActionBase(with_metaclass(ABCMeta, object)):
                 tmpdir = self._connection._shell.tmpdir
 
             remote_module_filename = self._connection._shell.get_remote_filename(module_path)
-            remote_module_path = self._connection._shell.join_path(tmpdir, remote_module_filename)
+            remote_module_path = self._connection._shell.join_path(tmpdir, 'AnsiballZ_%s' % remote_module_filename)
 
         args_file_path = None
         if module_style in ('old', 'non_native_want_json', 'binary'):
@@ -898,12 +884,20 @@ class ActionBase(with_metaclass(ABCMeta, object)):
         except ValueError:
             # not valid json, lets try to capture error
             data = dict(failed=True, _ansible_parsed=False)
-            data['msg'] = "MODULE FAILURE"
             data['module_stdout'] = res.get('stdout', u'')
             if 'stderr' in res:
                 data['module_stderr'] = res['stderr']
                 if res['stderr'].startswith(u'Traceback'):
                     data['exception'] = res['stderr']
+
+            # try to figure out if we are missing interpreter
+            if self._used_interpreter is not None and '%s: No such file or directory' % self._used_interpreter.lstrip('!#') in data['module_stderr']:
+                data['msg'] = "The module failed to execute correctly, you probably need to set the interpreter."
+            else:
+                data['msg'] = "MODULE FAILURE"
+
+            data['msg'] += '\nSee stdout/stderr for the exact error'
+
             if 'rc' in res:
                 data['rc'] = res['rc']
         return data

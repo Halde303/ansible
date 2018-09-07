@@ -8,7 +8,7 @@ __metaclass__ = type
 
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
+                    'status': ['deprecated'],
                     'supported_by': 'community'}
 
 
@@ -16,10 +16,9 @@ DOCUMENTATION = '''
 
 module: sf_volume_access_group_manager
 deprecated:
-  removed_in: "2.10"
+  removed_in: "2.11"
   why: This Module has been replaced
-  alternative: please use na_elementsw_access_group
-
+  alternative: please use M(na_elementsw_access_group)
 short_description: Manage SolidFire Volume Access Groups
 extends_documentation_fragment:
     - netapp.solidfire
@@ -44,37 +43,25 @@ options:
     initiators:
         description:
         - List of initiators to include in the volume access group. If unspecified, the access group will start out without configured initiators.
-        required: false
-        default: None
 
     volumes:
         description:
         - List of volumes to initially include in the volume access group. If unspecified, the access group will start without any volumes.
-        required: false
-        default: None
 
     virtual_network_id:
         description:
         - The ID of the SolidFire Virtual Network ID to associate the volume access group with.
-        required: false
-        default: None
 
     virtual_network_tags:
         description:
         - The ID of the VLAN Virtual Network Tag to associate the volume access group with.
-        required: false
-        default: None
 
     attributes:
         description: List of Name/Value pairs in JSON object format.
-        required: false
-        default: None
 
     volume_access_group_id:
         description:
         - The ID of the volume access group to modify or delete.
-        required: false
-        default: None
 
 '''
 
@@ -256,6 +243,7 @@ class SolidFireVolumeAccessGroup(object):
 def main():
     v = SolidFireVolumeAccessGroup()
     v.apply()
+
 
 if __name__ == '__main__':
     main()

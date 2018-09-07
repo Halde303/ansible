@@ -15,7 +15,7 @@ DOCUMENTATION = '''
 
 module: na_elementsw_ldap
 
-short_description: Manage elementsw ldap admin users
+short_description: NetApp Element Software Manage ldap admin users
 extends_documentation_fragment:
     - netapp.solidfire
 version_added: '2.7'
@@ -124,7 +124,7 @@ class NetappElementLdap(object):
             serverURIs=dict(required=False, type=str),
             userSearchBaseDN=dict(required=False, type=str),
             searchBindDN=dict(required=False, type=str),
-            searchBindPassword=dict(required=False, type=str),
+            searchBindPassword=dict(required=False, type=str, no_log=True),
             userSearchFilter=dict(required=False, type=str),
             userDNTemplate=dict(required=False, type=str),
             groupSearchCustomFilter=dict(required=False, type=str)

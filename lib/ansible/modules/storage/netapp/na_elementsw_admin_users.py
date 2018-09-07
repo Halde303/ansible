@@ -16,7 +16,7 @@ DOCUMENTATION = '''
 
 module: na_elementsw_admin_users
 
-short_description: Manage SolidFire admin users
+short_description: NetApp Element Software Manage Admin Users
 extends_documentation_fragment:
     - netapp.solidfire
 version_added: '2.7'
@@ -111,7 +111,7 @@ class NetAppElementSWAdminUser(object):
         self.argument_spec.update(dict(
             state=dict(required=True, choices=['present', 'absent']),
             element_username=dict(required=True, type='str'),
-            element_password=dict(required=False, type='str'),
+            element_password=dict(required=False, type='str', no_log=True),
             acceptEula=dict(required=False, type='bool'),
             access=dict(required=False, type='list')
         ))

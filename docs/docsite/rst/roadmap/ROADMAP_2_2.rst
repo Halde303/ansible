@@ -230,10 +230,10 @@ Another note from Jason M: A lot of this work is to ease the burden of CI, CI pe
 
     **Done:** Windows integration tests now run on Shippable.
 
-  - FreeBSD - Include FreeBSD in CI coverage. Not originally on the roadmap, this is an intermediary step for CI coverage for macOS.
+  - FreeBSD - Include FreeBSD in CI coverage. Not originally on the roadmap, this is an intermediary step for CI coverage for OS X.
 
     **Done:** FreeBSD integration tests now run on Shippable.
 
-  - macOS - Include macOS in CI coverage.
+  - OS X - Include OS X in CI coverage.
 
-    **Done:** macOS integration tests now run on Shippable.
+    **Done:** OS X integration tests now run on Shippable.

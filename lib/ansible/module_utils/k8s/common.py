@@ -1,5 +1,4 @@
-#
-#  Copyright 2018 Red Hat | Ansible
+# Copyright 2018 Red Hat | Ansible
 #
 # This file is part of Ansible
 #
@@ -27,6 +26,7 @@ from ansible.module_utils.six import iteritems, string_types
 
 try:
     import kubernetes
+    import openshift
     from openshift.dynamic import DynamicClient
     from openshift.dynamic.exceptions import ResourceNotFoundError, ResourceNotUniqueError
     HAS_K8S_MODULE_HELPER = True
@@ -60,6 +60,7 @@ def list_dict_str(value):
     elif isinstance(value, string_types):
         return value
     raise TypeError
+
 
 ARG_ATTRIBUTES_BLACKLIST = ('property_path',)
 
@@ -148,8 +149,11 @@ class K8sAnsibleMixin(object):
             elif key in auth_args and value is None:
                 env_value = os.getenv('K8S_AUTH_{0}'.format(key.upper()), None)
                 if env_value is not None:
-                    setattr(configuration, key, env_value)
-                    auth[key] = env_value
+                    if key == 'api_key':
+                        setattr(configuration, key, {'authorization': "Bearer {0}".format(env_value)})
+                    else:
+                        setattr(configuration, key, env_value)
+                        auth[key] = env_value
 
         kubernetes.client.Configuration.set_default(configuration)
 
@@ -201,14 +205,18 @@ class K8sAnsibleMixin(object):
 
     def kubernetes_facts(self, kind, api_version, name=None, namespace=None, label_selectors=None, field_selectors=None):
         resource = self.find_resource(kind, api_version)
-        result = resource.get(name=name,
-                              namespace=namespace,
-                              label_selector=','.join(label_selectors),
-                              field_selector=','.join(field_selectors)).to_dict()
+        try:
+            result = resource.get(name=name,
+                                  namespace=namespace,
+                                  label_selector=','.join(label_selectors),
+                                  field_selector=','.join(field_selectors)).to_dict()
+        except openshift.dynamic.exceptions.NotFoundError:
+            return dict(items=[])
+
         if 'items' in result:
-            return result
+            return dict(resources=result['items'])
         else:
-            return dict(items=[result])
+            return dict(resources=[result])
 
     def remove_aliases(self):
         """
@@ -255,6 +263,7 @@ class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
 
         if not HAS_K8S_MODULE_HELPER:
             self.fail_json(msg="This module requires the OpenShift Python client. Try `pip install openshift`")
+        self.openshift_version = openshift.__version__
 
         if not HAS_YAML:
             self.fail_json(msg="This module requires PyYAML. Try `pip install PyYAML`")

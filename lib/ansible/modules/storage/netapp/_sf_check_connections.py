@@ -8,16 +8,17 @@ __metaclass__ = type
 
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
+                    'status': ['deprecated'],
                     'supported_by': 'community'}
 
 
 DOCUMENTATION = '''
+
 module: sf_check_connections
 deprecated:
-  removed_in: "2.10"
+  removed_in: "2.11"
   why: This Module has been replaced
-  alternative: please use na_elementsw_check_connections
+  alternative: please use M(na_elementsw_check_connections)
 short_description: Check connectivity to MVIP and SVIP.
 extends_documentation_fragment:
     - netapp.solidfire
@@ -26,19 +27,24 @@ author: Sumit Kumar (sumit4@netapp.com)
 description:
 - Used to test the management connection to the cluster.
 - The test pings the MVIP and SVIP, and executes a simple API method to verify connectivity.
+
 options:
+
   skip:
     description:
     - Skip checking connection to SVIP or MVIP.
     choices: ['svip', 'mvip']
+
   mvip:
     description:
     - Optionally, use to test connection of a different MVIP.
     - This is not needed to test the connection to the target cluster.
+
   svip:
     description:
     - Optionally, use to test connection of a different SVIP.
     - This is not needed to test the connection to the target cluster.
+
 '''
 
 
@@ -51,6 +57,7 @@ EXAMPLES = """
 """
 
 RETURN = """
+
 """
 import traceback
 
@@ -92,6 +99,7 @@ class SolidFireConnection(object):
     def check_mvip_connection(self):
         """
             Check connection to MVIP
+
             :return: true if connection was successful, false otherwise.
             :rtype: bool
         """
@@ -108,6 +116,7 @@ class SolidFireConnection(object):
     def check_svip_connection(self):
         """
             Check connection to SVIP
+
             :return: true if connection was successful, false otherwise.
             :rtype: bool
         """
@@ -169,6 +178,7 @@ class SolidFireConnection(object):
 def main():
     v = SolidFireConnection()
     v.check()
+
 
 if __name__ == '__main__':
     main()

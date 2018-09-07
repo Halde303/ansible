@@ -62,7 +62,7 @@ options:
     description:
      - Source password.
      - Optional if this is same as destination password.
-short_description: "Manage NetApp SnapMirror"
+short_description: "NetApp ONTAP Manage SnapMirror"
 version_added: "2.7"
 '''
 
@@ -142,7 +142,7 @@ class NetAppONTAPSnapmirror(object):
                                    ),
             source_hostname=dict(required=False, type='str'),
             source_username=dict(required=False, type='str'),
-            source_password=dict(required=False, type='str')
+            source_password=dict(required=False, type='str', no_log=True)
         ))
 
         self.module = AnsibleModule(

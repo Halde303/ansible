@@ -14,7 +14,7 @@ DOCUMENTATION = '''
 
 module: na_elementsw_volume_pair
 
-short_description: Manage SolidFire Volume Pair
+short_description: NetApp Element Software Volume Pair
 extends_documentation_fragment:
     - netapp.solidfire
 version_added: '2.7'
@@ -140,7 +140,7 @@ class ElementSWVolumePair(object):
                       default='async'),
             dest_mvip=dict(required=True, type='str'),
             dest_username=dict(required=False, type='str'),
-            dest_password=dict(required=False, type='str')
+            dest_password=dict(required=False, type='str', no_log=True)
         ))
 
         self.module = AnsibleModule(

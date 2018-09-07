@@ -261,12 +261,13 @@ import datetime
 import json
 import os
 import shutil
+import sys
 import tempfile
 import traceback
 
 from collections import Mapping, Sequence
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.six import iteritems, string_types
+from ansible.module_utils.six import PY2, iteritems, string_types
 from ansible.module_utils.six.moves.urllib.parse import urlencode, urlsplit
 from ansible.module_utils._text import to_native, to_text
 from ansible.module_utils.urls import fetch_url, url_argument_spec
@@ -404,6 +405,7 @@ def uri(module, url, dest, body, body_format, method, headers, socket_timeout):
     else:
         data = body
 
+    kwargs = {}
     if dest is not None:
         # Stash follow_redirects, in this block we don't want to follow
         # we'll reset back to the supplied value soon
@@ -423,15 +425,13 @@ def uri(module, url, dest, body, body_format, method, headers, socket_timeout):
             dest = os.path.join(dest, url_filename(url))
         # if destination file already exist, only download if file newer
         if os.path.exists(dest):
-            t = datetime.datetime.utcfromtimestamp(os.path.getmtime(dest))
-            tstamp = t.strftime('%a, %d %b %Y %H:%M:%S +0000')
-            headers['If-Modified-Since'] = tstamp
+            kwargs['last_mod_time'] = datetime.datetime.utcfromtimestamp(os.path.getmtime(dest))
 
         # Reset follow_redirects back to the stashed value
         module.params['follow_redirects'] = follow_redirects
 
     resp, info = fetch_url(module, url, data=data, headers=headers,
-                           method=method, timeout=socket_timeout)
+                           method=method, timeout=socket_timeout, **kwargs)
 
     try:
         content = resp.read()
@@ -564,10 +564,8 @@ def main():
         ukey = key.replace("-", "_").lower()
         uresp[ukey] = value
 
-    try:
+    if 'location' in uresp:
         uresp['location'] = absolute_location(url, uresp['location'])
-    except KeyError:
-        pass
 
     # Default content_encoding to try
     content_encoding = 'utf-8'
@@ -581,7 +579,8 @@ def main():
                 js = json.loads(u_content)
                 uresp['json'] = js
             except:
-                pass
+                if PY2:
+                    sys.exc_clear()  # Avoid false positive traceback in fail_json() on Python 2
     else:
         u_content = to_text(content, encoding=content_encoding)
 

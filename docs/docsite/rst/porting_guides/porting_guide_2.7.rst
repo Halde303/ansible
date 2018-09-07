@@ -8,7 +8,7 @@ This section discusses the behavioral changes between Ansible 2.6 and Ansible 2.
 
 It is intended to assist in updating your playbooks, plugins and other parts of your Ansible infrastructure so they will work with this version of Ansible.
 
-We suggest you read this page along with `Ansible Changelog for 2.7 <https://github.com/ansible/ansible/blob/devel/changelogs/CHANGELOG-v2.7.rst>`_ to understand what updates you may need to make.
+We suggest you read this page along with `Ansible Changelog <https://github.com/ansible/ansible/blob/devel/CHANGELOG.md#2.7>`_ to understand what updates you may need to make.
 
 This document is part of a collection on porting. The complete list of porting guides can be found at :ref:`porting guides <porting_guides>`.
 
@@ -17,14 +17,7 @@ This document is part of a collection on porting. The complete list of porting g
 Playbook
 ========
 
-Role Precedence Fix during Role Loading
----------------------------------------
-
-Ansible 2.7 makes a small change to variable precedence when loading roles, resolving a bug, ensuring that role loading matches :ref:`variable precedence expectations <ansible_variable_precedence>`.
-
-Before Ansible 2.7, when loading a role, the variables defined in the role's ``vars/main.yml`` and ``defaults/main.yml`` were not available when parsing the role's ``tasks/main.yml`` file. This prevented the role from utilizing these variables when being parsed. The problem manifested when ``import_tasks`` or ``import_role`` was used with a variable defined in the role's vars or defaults.
-
-In Ansible 2.7, role ``vars`` and ``defaults`` are now parsed before ``tasks/main.yml``. This can cause a change in behavior if the same variable is defined at the play level and the role level with different values, and leveraged in ``import_tasks`` or ``import_role`` to define the role or file to import.
+No notable changes.
 
 Deprecated
 ==========
@@ -70,11 +63,6 @@ Major changes in popular modules are detailed here
   :ref:`DEFAULT_SYSLOG_FACILITY`. If you have :ref:`DEFAULT_SYSLOG_FACILITY` configured, the
   location of remote logs on systems which use journald may change.
 
-* The ``lineinfile`` module was changed to show a warning when using an empty string as a regexp.
-  Since an empty regexp matches every line in a file, it will replace the last line in a file rather
-  than inserting. If this is the desired behavior, use ``'^'`` which will match every line and
-  will not trigger the warning.
-
 
 Modules removed
 ---------------
@@ -90,6 +78,8 @@ The following modules will be removed in Ansible 2.10. Please update your playbo
 
 Noteworthy module changes
 -------------------------
+
+* The ``interface_name`` module option for ``na_ontap_net_vlan`` has been removed; this is not used anywhere and should just be removed from your playbooks
 
 No notable changes.
 

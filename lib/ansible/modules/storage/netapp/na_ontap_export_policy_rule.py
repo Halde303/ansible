@@ -203,9 +203,9 @@ class NetAppontapExportRule(object):
         rule_info.add_new_child('policy-name', self.policy_name)
         if self.vserver:
             rule_info.add_new_child('vserver-name', self.vserver)
-        else:
-            if self.client_match:
-                rule_info.add_new_child('client-match', self.client_match)
+
+        if self.client_match:
+            rule_info.add_new_child('client-match', self.client_match)
 
         query = netapp_utils.zapi.NaElement('query')
         query.add_child_elem(rule_info)
@@ -254,6 +254,7 @@ class NetAppontapExportRule(object):
             return_value = {
                 'policy-name': self.policy_name
             }
+
         return return_value
 
     def get_export_policy(self):
@@ -422,6 +423,22 @@ class NetAppontapExportRule(object):
             self.module.fail_json(msg='Error modifying super_user_security %s: %s' % (self.super_user_security, to_native(error)),
                                   exception=traceback.format_exc())
 
+    def modify_client_match(self, rule_index):
+        """
+        Modify client_match.
+        """
+        export_rule_modify_client_match = netapp_utils.zapi.NaElement.create_node_with_children(
+            'export-rule-modify',
+            **{'policy-name': self.policy_name,
+               'rule-index': rule_index,
+               'client-match': str(self.client_match)})
+        try:
+            self.server.invoke_successfully(export_rule_modify_client_match,
+                                            enable_tunneling=True)
+        except netapp_utils.zapi.NaApiError as error:
+            self.module.fail_json(msg='Error modifying client_match %s: %s' % (self.client_match, to_native(error)),
+                                  exception=traceback.format_exc())
+
     def modify_allow_suid(self, rule_index):
         """
         Modify allow_suid.
@@ -450,15 +467,11 @@ class NetAppontapExportRule(object):
         export_rule_superuser_changed = False
         netapp_utils.ems_log_event("na_ontap_export_policy_rules", self.server)
         export_policy_details = self.get_export_policy()
-        with open('/tmp/policydetails', 'w') as somefile:
-            somefile.write(str(export_policy_details))
 
         if not export_policy_details:
             if self.state == 'present':
                 self.create_export_policy()
         export_policy_rule_exists = self.get_export_policy_rule()
-        with open('/tmp/policyrule', 'w') as somefile:
-            somefile.write(str(export_policy_rule_exists))
         if self.state == 'absent':
             if export_policy_rule_exists:  # delete
                 changed = True
@@ -483,9 +496,6 @@ class NetAppontapExportRule(object):
                     if self.allow_suid is not None and \
                             export_policy_rule_exists['is-allow-set-uid-enabled'] != self.allow_suid:
                         export_rule_allow_suid_enabled = True
-                        with open('/tmp/policymodifytrue', 'w') as somefile:
-                            somefile.write(str(export_policy_rule_exists['is-allow-set-uid-enabled']))
-                            somefile.write(str(self.allow_suid))
                         changed = True
                     if self.super_user_security is not None and \
                             export_policy_rule_exists['super-user-security'] != self.super_user_security:
@@ -505,13 +515,6 @@ class NetAppontapExportRule(object):
                     if not export_policy_rule_exists:
                         self.create_export_policy_rule()
                     else:
-                        with open('/tmp/policymodify', 'w') as somefile:
-                            somefile.write(str(export_rule_protocol_changed))
-                            somefile.write(str(export_rule_ro_rule_changed))
-                            somefile.write(str(export_rule_rw_rule_changed))
-                            somefile.write(str(export_rule_allow_suid_enabled))
-                            somefile.write(str(export_rule_clientmatch_changed))
-                            somefile.write(str(export_rule_superuser_changed))
                         if export_rule_protocol_changed:
                             self.modify_protocol(rule_index)
                         if export_rule_ro_rule_changed:
